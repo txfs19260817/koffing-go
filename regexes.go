@@ -7,7 +7,7 @@ import (
 
 // Thanks to https://regexr.com/ to convert these regexes in Go manner.
 var (
-	Team             = regexp.MustCompile(`^===\s+\[(.*)\]\s+(.*)\s+===$`)
+	TeamTag          = regexp.MustCompile(`^===\s+\[(.*)\]\s+(.*)\s+===$`)
 	Gender           = regexp.MustCompile(`\([FM]\)`)
 	Item             = regexp.MustCompile(`@\s?(.*)$`)
 	Name             = regexp.MustCompile(`(?i)^([^()=@]{2,})`)

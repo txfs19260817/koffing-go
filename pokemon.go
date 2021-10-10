@@ -157,7 +157,7 @@ func (p *Pokemon) FromShowdown(s string) error {
 		case Nature.MatchString(line):
 			p.Nature = Nature.FindStringSubmatch(line)[1]
 		case EIvs.MatchString(line):
-			m, prop, err := EIvsLineToMap(line)
+			m, prop, err := fromEIvsLineToMap(line)
 			if err != nil {
 				return fmt.Errorf("error in parsing evs/ivs line: %w", err)
 			}
@@ -185,7 +185,7 @@ func (p *Pokemon) FromShowdown(s string) error {
 	return nil
 }
 
-func EIvsLineToMap(line string) (m map[string]int, prop string, err error) {
+func fromEIvsLineToMap(line string) (m map[string]int, prop string, err error) {
 	segments := EIvs.FindStringSubmatch(line)
 	if len(segments) != 3 {
 		return nil, "", fmt.Errorf("invalid evs/ivs line: %s", line)

@@ -8,8 +8,8 @@ import (
 
 func TestRegexes(t *testing.T) {
 	t.Parallel()
-	assert.True(t, Team.MatchString("=== [gen7] Folder 1/Example Team ==="))
-	assert.False(t, Team.MatchString("======"))
+	assert.True(t, TeamTag.MatchString("=== [gen7] Folder 1/Example Team ==="))
+	assert.False(t, TeamTag.MatchString("======"))
 
 	assert.True(t, Gender.MatchString("(F)") && Gender.MatchString("(M)"))
 	assert.False(t, Gender.MatchString("F") || Gender.MatchString("M"))
@@ -123,4 +123,5 @@ Adamant Nature
 `
 	res := SplitByEmptyNewline(s)
 	assert.Len(t, res, 7)
+	assert.True(t, TeamTag.MatchString(res[0]))
 }
