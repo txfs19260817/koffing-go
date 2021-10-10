@@ -1,6 +1,9 @@
 package koffing
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 // Thanks to https://regexr.com/ to convert these regexes in Go manner.
 var (
@@ -11,10 +14,25 @@ var (
 	NicknameWithName = regexp.MustCompile(`(?i)^([^()=@]*)\s+\(([^()=@]{2,})\)`)
 	Ability          = regexp.MustCompile(`^Ability:\s?(.*)$`)
 	Level            = regexp.MustCompile(`^Level:\s?([0-9]{1,3})$`)
-	Shiny            = regexp.MustCompile(`^Shiny:\s?(Yes|No)$`)
+	Shiny            = regexp.MustCompile(`^(?i)Shiny:\s?(Yes|No)$`)
 	Happiness        = regexp.MustCompile(`^Happiness:\s?([0-9]{1,3})$`)
 	EIvs             = regexp.MustCompile(`(?i)^([EI]Vs):\s?(.*)$`)
-	EIvsValue        = regexp.MustCompile(`(?i)^([0-9]+)\s+(hp|atk|def|spa|spd|spe)$`)
 	Nature           = regexp.MustCompile(`^(.*)\s+Nature$`)
 	Move             = regexp.MustCompile(`^[-~]\s?(.*)$`)
 )
+
+func SplitByEmptyNewline(s string) []string {
+	strNormalized := regexp.MustCompile("\r\n").ReplaceAllString(strings.TrimSpace(s), "\n")
+	parts := regexp.MustCompile(`\n\s*\n`).Split(strNormalized, -1)
+	return TrimLines(parts)
+}
+
+func TrimLines(lines []string) []string {
+	res := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if p := strings.TrimSpace(line); len(p) > 0 {
+			res = append(res, p)
+		}
+	}
+	return res
+}

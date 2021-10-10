@@ -170,6 +170,72 @@ func TestPokemon_Validate(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestPokemon_FromShowdown(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		s       string
+		wantErr bool
+	}{
+		{
+			name: "nickname",
+			s: `Smogon (Koffing) (F) @ Eviolite
+				Level: 100
+				Ability: Neutralizing Gas
+				Shiny: Yes
+				Happiness: 255
+				EVs: 36 HP / 236 Def / 236 SpD
+				Bold Nature
+				IVs: 31 HP / 30 SpD / 0 Spe
+				- Will-O-Wisp
+				- Pain Split
+				- Sludge Bomb
+				- Fire Blast`,
+			wantErr: false,
+		},
+		{
+			name: "name",
+			s: `Landorus @ Life Orb  
+				Ability: Sheer Force  
+				Level: 50  
+				EVs: 244 HP / 92 Def / 100 SpA / 4 SpD / 68 Spe  
+				Modest Nature  
+				- Earth Power  
+				- Sludge Bomb  
+				- Substitute  
+				- Protect
+				`,
+			wantErr: false,
+		},
+		{
+			name: "no name",
+			s: ` @ Sitrus Berry  
+				Ability: Misty Surge  
+				EVs: 252 HP / 68 Def / 4 SpA / 116 SpD / 68 Spe  
+				Calm Nature  
+				IVs: 0 Atk  
+				- Moonblast  
+				- Icy Wind  
+				- Haze  
+				- Nature's Madness
+				`,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := &Pokemon{}
+			err := p.FromShowdown(tt.s)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.NoError(t, p.Validate())
+			}
+		})
+	}
+}
+
 func TestPokemon_ToShowdown(t *testing.T) {
 	t.Parallel()
 	p := Pokemon{

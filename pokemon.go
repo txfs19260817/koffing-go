@@ -2,9 +2,10 @@ package koffing
 
 import (
 	"fmt"
-	jsoniter "github.com/json-iterator/go"
 	"strconv"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -103,6 +104,108 @@ func (p Pokemon) Validate() error {
 
 	}
 	return nil
+}
+
+func (p *Pokemon) FromShowdown(s string) error {
+	lines := TrimLines(strings.Split(s, "\n"))
+	if len(lines) < 3 {
+		return fmt.Errorf("invalid pokemon input: %s", s)
+	}
+	// name line - name/nickname
+	if NicknameWithName.MatchString(lines[0]) {
+		submatch := NicknameWithName.FindStringSubmatch(lines[0])
+		if len(submatch) != 3 {
+			return fmt.Errorf("invalid name with nickname: %s", lines[0])
+		}
+		p.Nickname, p.Name = submatch[1], submatch[2]
+	} else if Name.MatchString(lines[0]) {
+		p.Name = strings.TrimSpace(Name.FindString(lines[0]))
+	} else {
+		return fmt.Errorf("invalid name: %s", lines[0])
+	}
+	// name line - gender
+	if Gender.MatchString(lines[0]) {
+		p.Gender = string(Gender.FindString(lines[0])[1])
+	}
+	// name line - item
+	if Item.MatchString(lines[0]) {
+		p.Item = Item.FindStringSubmatch(lines[0])[1]
+	}
+	// init with some default values
+	p.Happiness = 255
+	p.Moves = make([]string, 0, 4)
+	p.Ivs.Hp, p.Ivs.Atk, p.Ivs.Def, p.Ivs.Spa, p.Ivs.Spd, p.Ivs.Spe = 31, 31, 31, 31, 31, 31
+	// other lines
+	for _, line := range lines[1:] {
+		switch {
+		case Ability.MatchString(line):
+			p.Ability = Ability.FindStringSubmatch(line)[1]
+		case Level.MatchString(line):
+			level, err := strconv.Atoi(Level.FindStringSubmatch(line)[1])
+			if err != nil {
+				return fmt.Errorf("invalid level: %w", err)
+			}
+			p.Level = level
+		case Shiny.MatchString(line):
+			p.Shiny = strings.ToLower(Shiny.FindStringSubmatch(line)[1]) == "yes"
+		case Happiness.MatchString(line):
+			happiness, err := strconv.Atoi(Happiness.FindStringSubmatch(line)[1])
+			if err != nil {
+				return fmt.Errorf("invalid happiness: %w", err)
+			}
+			p.Happiness = happiness
+		case Nature.MatchString(line):
+			p.Nature = Nature.FindStringSubmatch(line)[1]
+		case EIvs.MatchString(line):
+			m, prop, err := EIvsLineToMap(line)
+			if err != nil {
+				return fmt.Errorf("error in parsing evs/ivs line: %w", err)
+			}
+			if strings.Contains(prop, "E") {
+				p.Evs.Hp = m["HP"]
+				p.Evs.Atk = m["Atk"]
+				p.Evs.Def = m["Def"]
+				p.Evs.Spa = m["SpA"]
+				p.Evs.Spd = m["SpD"]
+				p.Evs.Spe = m["Spe"]
+			} else if strings.Contains(prop, "I") {
+				p.Ivs.Hp = m["HP"]
+				p.Ivs.Atk = m["Atk"]
+				p.Ivs.Def = m["Def"]
+				p.Ivs.Spa = m["SpA"]
+				p.Ivs.Spd = m["SpD"]
+				p.Ivs.Spe = m["Spe"]
+			} else {
+				return fmt.Errorf("error in parsing evs/ivs line: invalid prop %s", prop)
+			}
+		case Move.MatchString(line):
+			p.Moves = append(p.Moves, Move.FindStringSubmatch(line)[1])
+		}
+	}
+	return nil
+}
+
+func EIvsLineToMap(line string) (m map[string]int, prop string, err error) {
+	segments := EIvs.FindStringSubmatch(line)
+	if len(segments) != 3 {
+		return nil, "", fmt.Errorf("invalid evs/ivs line: %s", line)
+	}
+	prop = segments[1]
+	if strings.Contains(prop, "I") {
+		m = map[string]int{"HP": 31, "Atk": 31, "Def": 31, "SpA": 31, "SpD": 31, "Spe": 31}
+	} else {
+		m = map[string]int{"HP": 0, "Atk": 0, "Def": 0, "SpA": 0, "SpD": 0, "Spe": 0}
+	}
+	parts := strings.Split(segments[2], " / ")
+	for _, part := range parts {
+		stat := strings.Split(part, " ")
+		num, err := strconv.Atoi(stat[0])
+		if err != nil {
+			return nil, "", err
+		}
+		m[stat[1]] = num
+	}
+	return m, segments[1], nil
 }
 
 func (p Pokemon) ToShowdown() (string, error) {

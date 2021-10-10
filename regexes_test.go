@@ -50,11 +50,77 @@ func TestRegexes(t *testing.T) {
 	assert.False(t, EIvs.MatchString("IVs31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
 	assert.Equal(t, "EVs", EIvs.FindStringSubmatch("EVs: 36 HP / 236 Def / 236 SpD")[1])
 
-	assert.True(t, EIvsValue.MatchString("31 HP"))
-	assert.False(t, EIvsValue.MatchString("IVs: 31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
-	assert.Equal(t, "31", EIvsValue.FindStringSubmatch("31 HP")[1])
-
 	assert.True(t, Move.MatchString("- Protect"))
 	assert.False(t, Move.MatchString("Protect"))
 	assert.Equal(t, "Protect", Move.FindStringSubmatch("- Protect")[1])
+}
+
+func TestSplitByEmptyNewline(t *testing.T) {
+	s := `=== [gen8vgc2021] Untitled 10 ===
+
+Charizard-Gmax @ Wacan Berry  
+Ability: Solar Power  
+Level: 50  
+EVs: 4 HP / 252 SpA / 252 Spe  
+Timid Nature  
+IVs: 0 Atk  
+- Blast Burn  
+- Hurricane  
+- Ancient Power  
+- Protect  
+
+Venusaur-Gmax @ Coba Berry  
+Ability: Chlorophyll  
+Level: 50  
+EVs: 156 HP / 4 Def / 252 SpA / 4 SpD / 92 Spe  
+Modest Nature  
+IVs: 0 Atk  
+- Frenzy Plant  
+- Sludge Bomb  
+- Earth Power  
+- Sleep Powder  
+
+Tapu Fini @ Sitrus Berry  
+Ability: Misty Surge  
+EVs: 252 HP / 68 Def / 4 SpA / 116 SpD / 68 Spe  
+Calm Nature  
+IVs: 0 Atk  
+- Moonblast  
+- Icy Wind  
+- Haze  
+- Nature's Madness
+
+Thundurus @ Life Orb  
+Ability: Defiant  
+Level: 50  
+EVs: 4 HP / 252 Atk / 252 Spe  
+Jolly Nature  
+- Fly  
+- Wild Charge  
+- Superpower  
+- Protect  
+
+Urshifu @ Focus Sash  
+Ability: Unseen Fist  
+Level: 50  
+EVs: 252 Atk / 4 SpD / 252 Spe  
+Jolly Nature  
+- Close Combat  
+- Detect  
+- Wicked Blow  
+- Sucker Punch  
+
+Zacian @ Rusted Sword  
+Ability: Intrepid Sword  
+Level: 50  
+EVs: 252 HP / 108 Atk / 4 Def / 68 SpD / 76 Spe  
+Adamant Nature  
+- Iron Head  
+- Substitute  
+- Sacred Sword  
+- Protect  
+
+`
+	res := SplitByEmptyNewline(s)
+	assert.Len(t, res, 7)
 }
