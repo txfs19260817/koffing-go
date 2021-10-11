@@ -1,6 +1,8 @@
 package koffing
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,6 +12,8 @@ func TestRegexes(t *testing.T) {
 	t.Parallel()
 	assert.True(t, TeamTag.MatchString("=== [gen7] Folder 1/Example Team ==="))
 	assert.False(t, TeamTag.MatchString("======"))
+	assert.Equal(t, TeamTag.FindStringSubmatch("=== [gen8vgc2021] Untitled 10 ===")[1], "gen8vgc2021")
+	assert.Equal(t, TeamTag.FindStringSubmatch("=== [gen7] Folder 1/Example Team ===")[2], "Folder 1/Example Team")
 
 	assert.True(t, Gender.MatchString("(F)") && Gender.MatchString("(M)"))
 	assert.False(t, Gender.MatchString("F") || Gender.MatchString("M"))
@@ -124,4 +128,28 @@ Adamant Nature
 	res := SplitByEmptyNewline(s)
 	assert.Len(t, res, 7)
 	assert.True(t, TeamTag.MatchString(res[0]))
+}
+
+func TestTrimLines(t *testing.T) {
+	type args struct {
+		lines []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Zacian",
+			args: args{strings.Split("\nZacian @ Rusted Sword  \nAbility: Intrepid Sword  \nLevel: 50  \n", "\n")},
+			want: []string{"Zacian @ Rusted Sword", "Ability: Intrepid Sword", "Level: 50"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := TrimLines(tt.args.lines); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TrimLines() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

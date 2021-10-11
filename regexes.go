@@ -21,12 +21,16 @@ var (
 	Move             = regexp.MustCompile(`^[-~]\s?(.*)$`)
 )
 
+// SplitByEmptyNewline splits a multi-line string into parts.
+// Each part does not contain any empty line (\n, \r\n or \r).
 func SplitByEmptyNewline(s string) []string {
 	strNormalized := regexp.MustCompile("\r\n").ReplaceAllString(strings.TrimSpace(s), "\n")
 	parts := regexp.MustCompile(`\n\s*\n`).Split(strNormalized, -1)
 	return TrimLines(parts)
 }
 
+// TrimLines trims space for each element in input string slice,
+// and only keep non-empty strings.
 func TrimLines(lines []string) []string {
 	res := make([]string, 0, len(lines))
 	for _, line := range lines {

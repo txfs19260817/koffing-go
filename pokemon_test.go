@@ -9,6 +9,8 @@ import (
 
 func TestPokemon_FromJson(t *testing.T) {
 	t.Parallel()
+	p := &Pokemon{}
+	assert.Error(t, p.FromJson(`"name": "Koffing"`))
 	paste := `{
           "name": "Koffing",
           "nickname": "Smogon",
@@ -38,7 +40,6 @@ func TestPokemon_FromJson(t *testing.T) {
             "Fire Blast"
           ]
 	}`
-	p := &Pokemon{}
 	err := p.FromJson(paste)
 	assert.NoError(t, err)
 	assert.Equal(t, "Koffing", p.Name)
@@ -272,9 +273,9 @@ func TestPokemon_ToShowdown(t *testing.T) {
 				Ability: Neutralizing Gas
 				Shiny: Yes
 				Happiness: 255
-				EVs: 36 HP / 0 Atk / 236 Def / 0 SpA / 236 SpD / 0 Spe
+				EVs: 36 HP / 236 Def / 236 SpD
 				Bold Nature
-				IVs: 31 HP / 30 Atk / 0 Def / 31 SpA / 30 SpD / 31 Spe
+				IVs: 30 Atk / 0 Def / 30 SpD
 				- Will-O-Wisp
 				- Pain Split
 				- Sludge Bomb
