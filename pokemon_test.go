@@ -222,6 +222,13 @@ func TestPokemon_FromShowdown(t *testing.T) {
 				`,
 			wantErr: true,
 		},
+		{
+			name: "less than 3 non-empty lines",
+			s: `Tapu Fini @ Sitrus Berry  
+				Ability: Misty Surge  
+				`,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

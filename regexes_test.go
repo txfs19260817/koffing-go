@@ -10,53 +10,53 @@ import (
 
 func TestRegexes(t *testing.T) {
 	t.Parallel()
-	assert.True(t, TeamTag.MatchString("=== [gen7] Folder 1/Example Team ==="))
-	assert.False(t, TeamTag.MatchString("======"))
-	assert.Equal(t, TeamTag.FindStringSubmatch("=== [gen8vgc2021] Untitled 10 ===")[1], "gen8vgc2021")
-	assert.Equal(t, TeamTag.FindStringSubmatch("=== [gen7] Folder 1/Example Team ===")[2], "Folder 1/Example Team")
+	assert.True(t, teamTagRegex.MatchString("=== [gen7] Folder 1/Example Team ==="))
+	assert.False(t, teamTagRegex.MatchString("======"))
+	assert.Equal(t, teamTagRegex.FindStringSubmatch("=== [gen8vgc2021] Untitled 10 ===")[1], "gen8vgc2021")
+	assert.Equal(t, teamTagRegex.FindStringSubmatch("=== [gen7] Folder 1/Example Team ===")[2], "Folder 1/Example Team")
 
-	assert.True(t, Gender.MatchString("(F)") && Gender.MatchString("(M)"))
-	assert.False(t, Gender.MatchString("F") || Gender.MatchString("M"))
+	assert.True(t, genderRegex.MatchString("(F)") && genderRegex.MatchString("(M)"))
+	assert.False(t, genderRegex.MatchString("F") || genderRegex.MatchString("M"))
 
-	assert.True(t, Item.MatchString("@ Focus Sash"))
-	assert.Equal(t, "Focus Sash", Item.FindStringSubmatch("Weezing-Gmax @ Focus Sash")[1])
+	assert.True(t, itemRegex.MatchString("@ Focus Sash"))
+	assert.Equal(t, "Focus Sash", itemRegex.FindStringSubmatch("Weezing-Gmax @ Focus Sash")[1])
 
-	assert.True(t, Name.MatchString("Weezing @ Black Sludge"))
-	assert.Equal(t, "Weezing-Gmax ", Name.FindString("Weezing-Gmax @ Black Sludge"))
+	assert.True(t, nameRegex.MatchString("Weezing @ Black Sludge"))
+	assert.Equal(t, "Weezing-Gmax ", nameRegex.FindString("Weezing-Gmax @ Black Sludge"))
 
-	assert.True(t, NicknameWithName.MatchString("Smogon (Koffing) (F) @ Eviolite"))
-	assert.False(t, NicknameWithName.MatchString("Weezing @ Black Sludge"))
-	assert.Equal(t, "Tapu Koko", NicknameWithName.FindStringSubmatch("Tapu Koko (Weezing-Gmax) (F) @ Eviolite")[1])
-	assert.Equal(t, "Tapu Koko", NicknameWithName.FindStringSubmatch("Smogon (Tapu Koko) (F) @ Eviolite")[2])
+	assert.True(t, nicknameWithNameRegex.MatchString("Smogon (Koffing) (F) @ Eviolite"))
+	assert.False(t, nicknameWithNameRegex.MatchString("Weezing @ Black Sludge"))
+	assert.Equal(t, "Tapu Koko", nicknameWithNameRegex.FindStringSubmatch("Tapu Koko (Weezing-Gmax) (F) @ Eviolite")[1])
+	assert.Equal(t, "Tapu Koko", nicknameWithNameRegex.FindStringSubmatch("Smogon (Tapu Koko) (F) @ Eviolite")[2])
 
-	assert.True(t, Ability.MatchString("Ability: Levitate"))
-	assert.False(t, Ability.MatchString("Ability Levitate"))
-	assert.Equal(t, "Levitate", Ability.FindStringSubmatch("Ability: Levitate")[1])
+	assert.True(t, abilityRegex.MatchString("Ability: Levitate"))
+	assert.False(t, abilityRegex.MatchString("Ability Levitate"))
+	assert.Equal(t, "Levitate", abilityRegex.FindStringSubmatch("Ability: Levitate")[1])
 
-	assert.True(t, Level.MatchString("Level: 5"))
-	assert.False(t, Level.MatchString("Level: 1000"))
-	assert.Equal(t, "5", Level.FindStringSubmatch("Level: 5")[1])
+	assert.True(t, levelRegex.MatchString("Level: 5"))
+	assert.False(t, levelRegex.MatchString("Level: 1000"))
+	assert.Equal(t, "5", levelRegex.FindStringSubmatch("Level: 5")[1])
 
-	assert.True(t, Shiny.MatchString("Shiny: Yes"))
-	assert.False(t, Shiny.MatchString("Shiny: True"))
-	assert.Equal(t, "Yes", Shiny.FindStringSubmatch("Shiny: Yes")[1])
+	assert.True(t, shinyRegex.MatchString("Shiny: Yes"))
+	assert.False(t, shinyRegex.MatchString("Shiny: True"))
+	assert.Equal(t, "Yes", shinyRegex.FindStringSubmatch("Shiny: Yes")[1])
 
-	assert.True(t, Happiness.MatchString("Happiness: 255"))
-	assert.False(t, Happiness.MatchString("Happiness: -1"))
-	assert.Equal(t, "255", Happiness.FindStringSubmatch("Happiness: 255")[1])
+	assert.True(t, happinessRegex.MatchString("Happiness: 255"))
+	assert.False(t, happinessRegex.MatchString("Happiness: -1"))
+	assert.Equal(t, "255", happinessRegex.FindStringSubmatch("Happiness: 255")[1])
 
-	assert.True(t, Nature.MatchString("Bold Nature"))
-	assert.False(t, Nature.MatchString("BoldNature"))
-	assert.Equal(t, "Bold", Nature.FindStringSubmatch("Bold Nature")[1])
+	assert.True(t, natureRegex.MatchString("Bold Nature"))
+	assert.False(t, natureRegex.MatchString("BoldNature"))
+	assert.Equal(t, "Bold", natureRegex.FindStringSubmatch("Bold Nature")[1])
 
-	assert.True(t, EIvs.MatchString("EVs: 36 HP / 236 Def / 236 SpD"))
-	assert.True(t, EIvs.MatchString("IVs: 31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
-	assert.False(t, EIvs.MatchString("IVs31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
-	assert.Equal(t, "EVs", EIvs.FindStringSubmatch("EVs: 36 HP / 236 Def / 236 SpD")[1])
+	assert.True(t, eivsRegex.MatchString("EVs: 36 HP / 236 Def / 236 SpD"))
+	assert.True(t, eivsRegex.MatchString("IVs: 31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
+	assert.False(t, eivsRegex.MatchString("IVs31 HP / 30 Atk / 31 SpA / 30 SpD / 31 Spe"))
+	assert.Equal(t, "EVs", eivsRegex.FindStringSubmatch("EVs: 36 HP / 236 Def / 236 SpD")[1])
 
-	assert.True(t, Move.MatchString("- Protect"))
-	assert.False(t, Move.MatchString("Protect"))
-	assert.Equal(t, "Protect", Move.FindStringSubmatch("- Protect")[1])
+	assert.True(t, moveRegex.MatchString("- Protect"))
+	assert.False(t, moveRegex.MatchString("Protect"))
+	assert.Equal(t, "Protect", moveRegex.FindStringSubmatch("- Protect")[1])
 }
 
 func TestSplitByEmptyNewline(t *testing.T) {
@@ -127,7 +127,7 @@ Adamant Nature
 `
 	res := SplitByEmptyNewline(s)
 	assert.Len(t, res, 7)
-	assert.True(t, TeamTag.MatchString(res[0]))
+	assert.True(t, teamTagRegex.MatchString(res[0]))
 }
 
 func TestTrimLines(t *testing.T) {

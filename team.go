@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// Team contains not only a list of Pokemon, but also Name, Format and Folder information.
 type Team struct {
 	Name    string    `json:"name,omitempty"`
 	Format  string    `json:"format,omitempty"`
@@ -12,18 +13,21 @@ type Team struct {
 	Pokemon []Pokemon `json:"pokemon,omitempty"`
 }
 
+// FromJson parses the JSON-encoded Showdown paste/text data and stores the result in the pointer receiver.
 func (t *Team) FromJson(j string) error {
 	return json.Unmarshal([]byte(j), t)
 }
 
+// ToJson returns the JSON encoding of the receiver.
 func (t Team) ToJson() (string, error) {
 	return json.MarshalToString(t)
 }
 
+// FromShowdown parses the Showdown paste/text and stores the result in the pointer receiver.
 func (t *Team) FromShowdown(s string) error {
 	parts := SplitByEmptyNewline(s)
-	if TeamTag.MatchString(parts[0]) {
-		teamTags := TeamTag.FindStringSubmatch(parts[0])
+	if teamTagRegex.MatchString(parts[0]) {
+		teamTags := teamTagRegex.FindStringSubmatch(parts[0])
 		t.Format = teamTags[1]
 		if name := strings.Split(teamTags[2], "/"); len(name) == 2 {
 			t.Folder, t.Name = name[0], name[1]
@@ -43,6 +47,7 @@ func (t *Team) FromShowdown(s string) error {
 	return nil
 }
 
+// ToShowdown returns the Showdown paste/text of the receiver.
 func (t Team) ToShowdown() (string, error) {
 	var showdown strings.Builder
 	if len(t.Name) > 0 {
@@ -64,6 +69,7 @@ func (t Team) ToShowdown() (string, error) {
 	return showdown.String(), nil
 }
 
+// Validate essentially validates each Pokemon in this Team.
 func (t Team) Validate() error {
 	if len(t.Pokemon) == 0 {
 		return fmt.Errorf("empty team members")

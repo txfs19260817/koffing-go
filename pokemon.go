@@ -10,6 +10,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+// Pokemon contains all properties of a Pokémon you can set in Teambuilder on Pokémon Showdown.
 type Pokemon struct {
 	Name      string `json:"name"`
 	Nickname  string `json:"nickname"`
@@ -39,38 +40,41 @@ type Pokemon struct {
 	Moves []string `json:"moves"`
 }
 
+// FromJson parses the JSON-encoded Pokémon data and stores the result in the pointer receiver.
 func (p *Pokemon) FromJson(j string) error {
 	return json.Unmarshal([]byte(j), p)
 }
 
+// ToJson returns the JSON encoding of the receiver.
 func (p Pokemon) ToJson() (string, error) {
 	return json.MarshalToString(p)
 }
 
+// FromShowdown parses the Showdown-formatted Pokémon data and stores the result in the pointer receiver.
 func (p *Pokemon) FromShowdown(s string) error {
 	lines := TrimLines(strings.Split(s, "\n"))
 	if len(lines) < 3 {
 		return fmt.Errorf("invalid pokemon input: %s", s)
 	}
 	// name line - name/nickname
-	if NicknameWithName.MatchString(lines[0]) {
-		submatch := NicknameWithName.FindStringSubmatch(lines[0])
+	if nicknameWithNameRegex.MatchString(lines[0]) {
+		submatch := nicknameWithNameRegex.FindStringSubmatch(lines[0])
 		if len(submatch) != 3 {
 			return fmt.Errorf("invalid name with nickname: %s", lines[0])
 		}
 		p.Nickname, p.Name = submatch[1], submatch[2]
-	} else if Name.MatchString(lines[0]) {
-		p.Name = strings.TrimSpace(Name.FindString(lines[0]))
+	} else if nameRegex.MatchString(lines[0]) {
+		p.Name = strings.TrimSpace(nameRegex.FindString(lines[0]))
 	} else {
 		return fmt.Errorf("invalid name: %s", lines[0])
 	}
 	// name line - gender
-	if Gender.MatchString(lines[0]) {
-		p.Gender = string(Gender.FindString(lines[0])[1])
+	if genderRegex.MatchString(lines[0]) {
+		p.Gender = string(genderRegex.FindString(lines[0])[1])
 	}
 	// name line - item
-	if Item.MatchString(lines[0]) {
-		p.Item = Item.FindStringSubmatch(lines[0])[1]
+	if itemRegex.MatchString(lines[0]) {
+		p.Item = itemRegex.FindStringSubmatch(lines[0])[1]
 	}
 	// init with some default values
 	p.Happiness = 255
@@ -79,25 +83,25 @@ func (p *Pokemon) FromShowdown(s string) error {
 	// other lines
 	for _, line := range lines[1:] {
 		switch {
-		case Ability.MatchString(line):
-			p.Ability = Ability.FindStringSubmatch(line)[1]
-		case Level.MatchString(line):
-			level, err := strconv.Atoi(Level.FindStringSubmatch(line)[1])
+		case abilityRegex.MatchString(line):
+			p.Ability = abilityRegex.FindStringSubmatch(line)[1]
+		case levelRegex.MatchString(line):
+			level, err := strconv.Atoi(levelRegex.FindStringSubmatch(line)[1])
 			if err != nil {
 				return fmt.Errorf("invalid level: %w", err)
 			}
 			p.Level = level
-		case Shiny.MatchString(line):
-			p.Shiny = strings.ToLower(Shiny.FindStringSubmatch(line)[1]) == "yes"
-		case Happiness.MatchString(line):
-			happiness, err := strconv.Atoi(Happiness.FindStringSubmatch(line)[1])
+		case shinyRegex.MatchString(line):
+			p.Shiny = strings.ToLower(shinyRegex.FindStringSubmatch(line)[1]) == "yes"
+		case happinessRegex.MatchString(line):
+			happiness, err := strconv.Atoi(happinessRegex.FindStringSubmatch(line)[1])
 			if err != nil {
 				return fmt.Errorf("invalid happiness: %w", err)
 			}
 			p.Happiness = happiness
-		case Nature.MatchString(line):
-			p.Nature = Nature.FindStringSubmatch(line)[1]
-		case EIvs.MatchString(line):
+		case natureRegex.MatchString(line):
+			p.Nature = natureRegex.FindStringSubmatch(line)[1]
+		case eivsRegex.MatchString(line):
 			m, prop, err := fromEIvsLineToMap(line)
 			if err != nil {
 				return fmt.Errorf("error in parsing evs/ivs line: %w", err)
@@ -119,23 +123,23 @@ func (p *Pokemon) FromShowdown(s string) error {
 			} else {
 				return fmt.Errorf("error in parsing evs/ivs line: invalid prop %s", prop)
 			}
-		case Move.MatchString(line):
-			p.Moves = append(p.Moves, Move.FindStringSubmatch(line)[1])
+		case moveRegex.MatchString(line):
+			p.Moves = append(p.Moves, moveRegex.FindStringSubmatch(line)[1])
 		}
 	}
 	return nil
 }
 
-func fromEIvsLineToMap(line string) (m map[string]int, prop string, err error) {
-	segments := EIvs.FindStringSubmatch(line)
+func fromEIvsLineToMap(line string) (eivsMap map[string]int, prop string, err error) {
+	segments := eivsRegex.FindStringSubmatch(line)
 	if len(segments) != 3 {
 		return nil, "", fmt.Errorf("invalid evs/ivs line: %s", line)
 	}
 	prop = segments[1]
 	if strings.Contains(prop, "I") {
-		m = map[string]int{"HP": 31, "Atk": 31, "Def": 31, "SpA": 31, "SpD": 31, "Spe": 31}
+		eivsMap = map[string]int{"HP": 31, "Atk": 31, "Def": 31, "SpA": 31, "SpD": 31, "Spe": 31}
 	} else {
-		m = map[string]int{"HP": 0, "Atk": 0, "Def": 0, "SpA": 0, "SpD": 0, "Spe": 0}
+		eivsMap = map[string]int{"HP": 0, "Atk": 0, "Def": 0, "SpA": 0, "SpD": 0, "Spe": 0}
 	}
 	parts := strings.Split(segments[2], " / ")
 	for _, part := range parts {
@@ -144,11 +148,12 @@ func fromEIvsLineToMap(line string) (m map[string]int, prop string, err error) {
 		if err != nil {
 			return nil, "", err
 		}
-		m[stat[1]] = num
+		eivsMap[stat[1]] = num
 	}
-	return m, segments[1], nil
+	return eivsMap, segments[1], nil
 }
 
+// ToShowdown returns the Showdown-formatted text of the receiver.
 func (p Pokemon) ToShowdown() (string, error) {
 	var showdown strings.Builder
 	showdown.Grow(300) // estimated string length
@@ -261,6 +266,7 @@ func (p Pokemon) ToShowdown() (string, error) {
 	return showdown.String(), nil
 }
 
+// Validate verify the legitimation of this Pokemon with some basic rules, most of which are empty and range checking.
 func (p Pokemon) Validate() error {
 	if len(p.Name) == 0 {
 		return fmt.Errorf("name is required")

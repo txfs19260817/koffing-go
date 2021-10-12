@@ -1,6 +1,6 @@
 package koffing
 
-type Showdown interface {
+type showdown interface {
 	FromJson(j string) error
 	ToJson() (string, error)
 	FromShowdown(s string) error
