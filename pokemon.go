@@ -52,7 +52,7 @@ func (p Pokemon) ToJson() (string, error) {
 
 // FromShowdown parses the Showdown-formatted Pokémon data and stores the result in the pointer receiver.
 func (p *Pokemon) FromShowdown(s string) error {
-	lines := TrimLines(strings.Split(s, "\n"))
+	lines := trimLines(strings.Split(s, "\n"))
 	if len(lines) < 3 {
 		return fmt.Errorf("invalid pokemon input: %s", s)
 	}

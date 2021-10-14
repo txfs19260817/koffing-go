@@ -1,11 +1,47 @@
 package koffing
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func ExamplePokemon_FromJson() {
+	p := &Pokemon{}
+	paste := `{
+          "name": "Koffing",
+          "nickname": "Smogon",
+          "gender": "F",
+          "item": "Eviolite",
+          "ability": "Neutralizing Gas",
+          "level": 5,
+          "shiny": true,
+          "happiness": 255,
+          "nature": "Bold",
+          "evs": {
+            "hp": 36,
+            "def": 236,
+            "spd": 236
+          },
+          "ivs": {
+            "hp": 31,
+            "atk": 30,
+            "spa": 31,
+            "spd": 30
+          },
+          "moves": [
+            "Will-O-Wisp",
+            "Pain Split",
+            "Sludge Bomb",
+            "Fire Blast"
+          ]
+	}`
+	_ = p.FromJson(paste)
+	fmt.Printf("%+v", p)
+	// Output: &{Name:Koffing Nickname:Smogon Gender:F Item:Eviolite Ability:Neutralizing Gas Level:5 Shiny:true Happiness:255 Nature:Bold Evs:{Hp:36 Atk:0 Def:236 Spa:0 Spd:236 Spe:0} Ivs:{Hp:31 Atk:30 Def:0 Spa:31 Spd:30 Spe:0} Moves:[Will-O-Wisp Pain Split Sludge Bomb Fire Blast]}
+}
 
 func TestPokemon_FromJson(t *testing.T) {
 	t.Parallel()
@@ -56,6 +92,40 @@ func TestPokemon_FromJson(t *testing.T) {
 	assert.Equal(t, []string{"Will-O-Wisp", "Pain Split", "Sludge Bomb", "Fire Blast"}, p.Moves)
 }
 
+func ExamplePokemon_ToJson() {
+	p := Pokemon{
+		Name:      "Koffing",
+		Nickname:  "Smogon",
+		Gender:    "F",
+		Item:      "Eviolite",
+		Ability:   "Neutralizing Gas",
+		Level:     5,
+		Shiny:     true,
+		Happiness: 255,
+		Nature:    "Bold",
+		Evs: struct {
+			Hp  int `json:"hp"`
+			Atk int `json:"atk"`
+			Def int `json:"def"`
+			Spa int `json:"spa"`
+			Spd int `json:"spd"`
+			Spe int `json:"spe"`
+		}{Hp: 36, Def: 236, Spd: 236},
+		Ivs: struct {
+			Hp  int `json:"hp"`
+			Atk int `json:"atk"`
+			Def int `json:"def"`
+			Spa int `json:"spa"`
+			Spd int `json:"spd"`
+			Spe int `json:"spe"`
+		}{Hp: 31, Atk: 30, Spa: 31, Spd: 30, Spe: 31},
+		Moves: []string{"Will-O-Wisp", "Pain Split", "Sludge Bomb", "Fire Blast"},
+	}
+	j, _ := p.ToJson()
+	fmt.Print(j)
+	// Output: {"name":"Koffing","nickname":"Smogon","gender":"F","item":"Eviolite","ability":"Neutralizing Gas","level":5,"shiny":true,"happiness":255,"nature":"Bold","evs":{"hp":36,"atk":0,"def":236,"spa":0,"spd":236,"spe":0},"ivs":{"hp":31,"atk":30,"def":0,"spa":31,"spd":30,"spe":31},"moves":["Will-O-Wisp","Pain Split","Sludge Bomb","Fire Blast"]}
+}
+
 func TestPokemon_ToJson(t *testing.T) {
 	t.Parallel()
 	p := Pokemon{
@@ -89,6 +159,13 @@ func TestPokemon_ToJson(t *testing.T) {
 	j, err := p.ToJson()
 	assert.NoError(t, err)
 	assert.Equal(t, `{"name":"Koffing","nickname":"Smogon","gender":"F","item":"Eviolite","ability":"Neutralizing Gas","level":5,"shiny":true,"happiness":255,"nature":"Bold","evs":{"hp":36,"atk":0,"def":236,"spa":0,"spd":236,"spe":0},"ivs":{"hp":31,"atk":30,"def":0,"spa":31,"spd":30,"spe":31},"moves":["Will-O-Wisp","Pain Split","Sludge Bomb","Fire Blast"]}`, j)
+}
+
+func ExamplePokemon_Validate() {
+	p := Pokemon{}
+	err := p.Validate()
+	fmt.Print(err.Error())
+	// Output: name is required
 }
 
 func TestPokemon_Validate(t *testing.T) {
@@ -171,6 +248,25 @@ func TestPokemon_Validate(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func ExamplePokemon_FromShowdown() {
+	s := `Smogon (Koffing) (F) @ Eviolite
+		Level: 100
+		Ability: Neutralizing Gas
+		Shiny: Yes
+		Happiness: 255
+		EVs: 36 HP / 236 Def / 236 SpD
+		Bold Nature
+		IVs: 31 HP / 30 SpD / 0 Spe
+		- Will-O-Wisp
+		- Pain Split
+		- Sludge Bomb
+		- Fire Blast`
+	p := &Pokemon{}
+	_ = p.FromShowdown(s)
+	fmt.Printf("%+v", p)
+	// Output: &{Name:Koffing Nickname:Smogon Gender:F Item:Eviolite Ability:Neutralizing Gas Level:100 Shiny:true Happiness:255 Nature:Bold Evs:{Hp:36 Atk:0 Def:236 Spa:0 Spd:236 Spe:0} Ivs:{Hp:31 Atk:31 Def:31 Spa:31 Spd:30 Spe:0} Moves:[Will-O-Wisp Pain Split Sludge Bomb Fire Blast]}
+}
+
 func TestPokemon_FromShowdown(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -244,6 +340,51 @@ func TestPokemon_FromShowdown(t *testing.T) {
 	}
 }
 
+func ExamplePokemon_ToShowdown() {
+	p := Pokemon{
+		Name:      "Koffing",
+		Nickname:  "Smogon",
+		Gender:    "F",
+		Item:      "Eviolite",
+		Ability:   "Neutralizing Gas",
+		Level:     100,
+		Shiny:     true,
+		Happiness: 255,
+		Nature:    "Bold",
+		Evs: struct {
+			Hp  int `json:"hp"`
+			Atk int `json:"atk"`
+			Def int `json:"def"`
+			Spa int `json:"spa"`
+			Spd int `json:"spd"`
+			Spe int `json:"spe"`
+		}{Hp: 36, Def: 236, Spd: 236},
+		Ivs: struct {
+			Hp  int `json:"hp"`
+			Atk int `json:"atk"`
+			Def int `json:"def"`
+			Spa int `json:"spa"`
+			Spd int `json:"spd"`
+			Spe int `json:"spe"`
+		}{Hp: 31, Atk: 30, Spa: 31, Spd: 30, Spe: 31},
+		Moves: []string{"Will-O-Wisp", "Pain Split", "Sludge Bomb", "Fire Blast"},
+	}
+	s, _ := p.ToShowdown()
+	fmt.Print(s)
+	// Output: Smogon (Koffing) (F) @ Eviolite
+	//Level: 100
+	//Ability: Neutralizing Gas
+	//Shiny: Yes
+	//Happiness: 255
+	//EVs: 36 HP / 236 Def / 236 SpD
+	//Bold Nature
+	//IVs: 30 Atk / 0 Def / 30 SpD
+	//- Will-O-Wisp
+	//- Pain Split
+	//- Sludge Bomb
+	//- Fire Blast
+}
+
 func TestPokemon_ToShowdown(t *testing.T) {
 	t.Parallel()
 	p := Pokemon{
@@ -288,9 +429,9 @@ func TestPokemon_ToShowdown(t *testing.T) {
 				- Sludge Bomb
 				- Fire Blast
 				`
-	showdown, err := p.ToShowdown()
+	s, err := p.ToShowdown()
 	assert.NoError(t, err)
-	expectedSlice, actualSlice := strings.Split(expected, "\n"), strings.Split(showdown, "\n")
+	expectedSlice, actualSlice := strings.Split(expected, "\n"), strings.Split(s, "\n")
 	assert.Equal(t, len(expectedSlice), len(actualSlice))
 	for i, e := range expectedSlice {
 		assert.Equal(t, strings.TrimSpace(e), strings.TrimSpace(actualSlice[i]))

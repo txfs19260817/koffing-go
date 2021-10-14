@@ -25,7 +25,7 @@ func (t Team) ToJson() (string, error) {
 
 // FromShowdown parses the Showdown paste/text and stores the result in the pointer receiver.
 func (t *Team) FromShowdown(s string) error {
-	parts := SplitByEmptyNewline(s)
+	parts := splitByEmptyNewline(s)
 	if teamTagRegex.MatchString(parts[0]) {
 		teamTags := teamTagRegex.FindStringSubmatch(parts[0])
 		t.Format = teamTags[1]

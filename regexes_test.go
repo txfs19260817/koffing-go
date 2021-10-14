@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRegexes(t *testing.T) {
+func Test_regexes(t *testing.T) {
 	t.Parallel()
 	assert.True(t, teamTagRegex.MatchString("=== [gen7] Folder 1/Example Team ==="))
 	assert.False(t, teamTagRegex.MatchString("======"))
@@ -59,7 +59,7 @@ func TestRegexes(t *testing.T) {
 	assert.Equal(t, "Protect", moveRegex.FindStringSubmatch("- Protect")[1])
 }
 
-func TestSplitByEmptyNewline(t *testing.T) {
+func Test_splitByEmptyNewline(t *testing.T) {
 	s := `=== [gen8vgc2021] Untitled 10 ===
 
 Charizard-Gmax @ Wacan Berry  
@@ -125,12 +125,12 @@ Adamant Nature
 - Protect  
 
 `
-	res := SplitByEmptyNewline(s)
+	res := splitByEmptyNewline(s)
 	assert.Len(t, res, 7)
 	assert.True(t, teamTagRegex.MatchString(res[0]))
 }
 
-func TestTrimLines(t *testing.T) {
+func Test_trimLines(t *testing.T) {
 	type args struct {
 		lines []string
 	}
@@ -147,8 +147,8 @@ func TestTrimLines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := TrimLines(tt.args.lines); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("TrimLines() = %v, want %v", got, tt.want)
+			if got := trimLines(tt.args.lines); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("trimLines() = %v, want %v", got, tt.want)
 			}
 		})
 	}
